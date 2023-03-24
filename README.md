@@ -1,6 +1,8 @@
 # VolumetricFog-URP2022
 Volumetric Fog for URP 2022. Created with the Forward+ renderer in mind.
 
+Requires URP 2022.2+. Install as a package.
+
 ![A preview of the volumetric fog](https://i.imgur.com/PROcfWg.png)
 
 ## Usage
