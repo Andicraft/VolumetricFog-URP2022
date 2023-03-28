@@ -18,7 +18,7 @@ namespace Andicraft.VolumetricFog
         public float scatteringCoefficient = 1;
         [Range(0, 1)]
         public float extinctionCoefficient = 1;
-        public Texture2D[] blueNoiseTextures;
+        public Texture2D blueNoise;
         [Range(0, 0.95f)]
         public float anisotropy = 0.85f;
         public bool heightFog;
@@ -91,7 +91,7 @@ namespace Andicraft.VolumetricFog
 
         void Update()
         {
-            Shader.SetGlobalTexture(s_VFogBlueNoise, blueNoiseTextures[0]);
+            Shader.SetGlobalTexture(s_VFogBlueNoise, blueNoise);
         }
 
         void UpdateValues()
