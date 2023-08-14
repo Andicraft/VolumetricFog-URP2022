@@ -215,7 +215,7 @@ namespace Andicraft.VolumetricFog
                     m_FogVolumesBuffer.SetData(structs);
                     renderMaterial.SetBuffer("_VFogVolumes", m_FogVolumesBuffer);
                 }
-                Shader.SetKeyword(kw_VolumesEnabled, vfog.volumes.Count != 0);
+                Shader.SetKeyword(kw_VolumesEnabled, vfog && vfog.volumes.Count != 0);
             }
 
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
