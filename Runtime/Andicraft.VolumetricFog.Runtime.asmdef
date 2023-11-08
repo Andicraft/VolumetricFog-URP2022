@@ -2,7 +2,6 @@
     "name": "Andicraft.VolumetricFog.Runtime",
     "rootNamespace": "",
     "references": [
-        "GUID:e823faf2b39da2340a073cae1fc2e521",
         "GUID:15fc0a57446b3144c949da3e2b9737a9",
         "GUID:df380645f10b7bc4b97d4f5eb6303d95"
     ],

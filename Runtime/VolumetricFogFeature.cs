@@ -134,6 +134,7 @@ namespace Andicraft.VolumetricFog
                 copyDepthPass = mat.FindPass("Copy Depth");
                 upscaleFogPass = mat.FindPass("Upscale Fog");
 
+                renderMaterial.SetVector("_BlitScaleBias", new Vector4(1, 1, 0, 0));
                 renderMaterial.SetFloat(s_maxDistance, p.maxDistance);
                 renderMaterial.SetInteger(s_raymarchSteps, p.raymarchSteps);
                 renderMaterial.SetInteger(s_selfShadowing, p.selfShadowing ? 1 : 0);
@@ -215,13 +216,21 @@ namespace Andicraft.VolumetricFog
                     m_FogVolumesBuffer.SetData(structs);
                     renderMaterial.SetBuffer("_VFogVolumes", m_FogVolumesBuffer);
                 }
-                Shader.SetKeyword(kw_VolumesEnabled, vfog.volumes.Count != 0);
+
+                Shader.SetKeyword(kw_VolumesEnabled, vfog && vfog.volumes.Count != 0);
             }
 
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
                 if (renderingData.cameraData.isPreviewCamera || renderingData.cameraData.cameraType == CameraType.Reflection)
                     return;
+
+                VolumetricFog vfog;
+                if (Application.isPlaying) vfog = VolumetricFog.instance;
+                else vfog = VolumetricFog.FindObjectOfType<VolumetricFog>();
+
+                if (!vfog) return;
+                if (!vfog.enabled) return;
 
                 var cameraData = renderingData.cameraData;
                 var source = cameraData.renderer.cameraColorTargetHandle;
