@@ -10,7 +10,6 @@ namespace Andicraft.VolumetricFog
     public class VolumetricFogFeature : ScriptableRendererFeature
     {
         private VolumetricFogRenderPass renderPass;
-        private Material renderMaterial;
         private ShaderParameters parameters;
 
         [Range(8, 128)]
@@ -44,7 +43,7 @@ namespace Andicraft.VolumetricFog
                 parameters.lowestMipDistance = lowestMipDistance;
                 parameters.blurDepthFalloff = blurDepthFalloff;
 
-                renderPass.Setup(renderingData, renderMaterial, parameters);
+                renderPass.Setup(renderingData, parameters);
                 renderer.EnqueuePass(renderPass);
             }
         }
@@ -59,11 +58,6 @@ namespace Andicraft.VolumetricFog
 
         public override void Create()
         {
-            Shader s = Shader.Find("Hidden/Andicraft/Volumetric Fog");
-            if (renderMaterial == null)
-            {
-                renderMaterial = CoreUtils.CreateEngineMaterial(s);
-            }
             renderPass ??= new();
             parameters = new ShaderParameters();
         }
@@ -72,7 +66,6 @@ namespace Andicraft.VolumetricFog
         {
             renderPass?.Dispose();
             renderPass = null;
-            CoreUtils.Destroy(renderMaterial);
         }
 
         internal struct ShaderParameters
@@ -118,22 +111,24 @@ namespace Andicraft.VolumetricFog
             {
                 base.profilingSampler = new ProfilingSampler("Volumetric Fog Pass");
                 renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
+                Shader shader = Shader.Find("Hidden/Andicraft/Volumetric Fog");
+                renderMaterial = CoreUtils.CreateEngineMaterial(shader);
             }
 
-            public void Setup(RenderingData renderingData, Material mat, ShaderParameters p)
+            public void Setup(RenderingData renderingData, ShaderParameters p)
             {
-                renderMaterial = mat;
                 parameters = p;
 
                 kw_VolumesEnabled = GlobalKeyword.Create("_VFOG_VOLUMES");
 
-                renderFogPass = mat.FindPass("Render Fog");
-                blurPassH = mat.FindPass("Blur Horizontal");
-                blurPassV = mat.FindPass("Blur Vertical");
-                applyFogPass = mat.FindPass("Apply Fog");
-                copyDepthPass = mat.FindPass("Copy Depth");
-                upscaleFogPass = mat.FindPass("Upscale Fog");
+                renderFogPass = renderMaterial.FindPass("Render Fog");
+                blurPassH = renderMaterial.FindPass("Blur Horizontal");
+                blurPassV = renderMaterial.FindPass("Blur Vertical");
+                applyFogPass = renderMaterial.FindPass("Apply Fog");
+                copyDepthPass = renderMaterial.FindPass("Copy Depth");
+                upscaleFogPass = renderMaterial.FindPass("Upscale Fog");
 
+                renderMaterial.SetVector("_BlitScaleBias", new Vector4(1, 1, 0, 0));
                 renderMaterial.SetFloat(s_maxDistance, p.maxDistance);
                 renderMaterial.SetInteger(s_raymarchSteps, p.raymarchSteps);
                 renderMaterial.SetInteger(s_selfShadowing, p.selfShadowing ? 1 : 0);
@@ -215,13 +210,21 @@ namespace Andicraft.VolumetricFog
                     m_FogVolumesBuffer.SetData(structs);
                     renderMaterial.SetBuffer("_VFogVolumes", m_FogVolumesBuffer);
                 }
-                Shader.SetKeyword(kw_VolumesEnabled, vfog.volumes.Count != 0);
+
+                Shader.SetKeyword(kw_VolumesEnabled, vfog && vfog.volumes.Count != 0);
             }
 
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
                 if (renderingData.cameraData.isPreviewCamera || renderingData.cameraData.cameraType == CameraType.Reflection)
                     return;
+
+                VolumetricFog vfog;
+                if (Application.isPlaying) vfog = VolumetricFog.instance;
+                else vfog = VolumetricFog.FindObjectOfType<VolumetricFog>();
+
+                if (!vfog) return;
+                if (!vfog.enabled) return;
 
                 var cameraData = renderingData.cameraData;
                 var source = cameraData.renderer.cameraColorTargetHandle;
@@ -268,8 +271,6 @@ namespace Andicraft.VolumetricFog
                 blurBuffer2?.Release();
                 m_FogVolumesBuffer?.Dispose();
             }
-
-
         }
 
         private static readonly int s_CameraViewXExtentID = Shader.PropertyToID("_CameraViewXExtent");
