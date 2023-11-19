@@ -79,7 +79,7 @@ float4 _VFogBuffer_TexelSize;
 float BlueNoise(float2 uv)
 {
     float2 coords = (uv * _ScreenParams.xy) / 256.0;
-    return SAMPLE_TEXTURE2D(_VFogBlueNoise, sampler_PointRepeat, coords).a;
+    return SAMPLE_TEXTURE2D(_VFogBlueNoise, sampler_PointRepeat, coords).r;
 }
 
 float GetHalfDepth(float2 uv)
