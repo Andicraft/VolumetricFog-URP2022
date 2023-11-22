@@ -108,7 +108,7 @@ float getCornetteShanks(float costh)
 {
     float g2 = _VFogAnisotropy * _VFogAnisotropy;
 			     
-    return (3.0 * (1.0 - g2) * (1.0 + costh * costh)) / (4.0 * M_PI * 2.0 * (2.0 + g2) * pow(1.0 + g2 - 2.0 * _VFogAnisotropy * costh, 3.0/2.0));
+    return (3.0 * (1.0 - g2) * (1.0 + costh * costh)) / (4.0 * PI * 2.0 * (2.0 + g2) * pow(1.0 + g2 - 2.0 * _VFogAnisotropy * costh, 3.0/2.0));
 }
 
 // Henyey-Greenstein Phase Function
